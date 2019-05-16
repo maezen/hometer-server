@@ -10,10 +10,46 @@
 package api
 
 import (
+	"fmt"
+	"log"
 	"net/http"
+
+	"periph.io/x/periph/conn/i2c/i2creg"
+	"periph.io/x/periph/conn/physic"
+	"periph.io/x/periph/devices/bmxx80"
+	"periph.io/x/periph/host"
 )
 
 func GetCurrentTemperature(w http.ResponseWriter, r *http.Request) {
+
+	// Load all the drivers:
+	if _, err := host.Init(); err != nil {
+		log.Fatal(err)
+	}
+
+	// Open a handle to the first available I²C bus:
+	bus, err := i2creg.Open("")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer bus.Close()
+
+	// Open a handle to a bme280/bmp280 connected on the I²C bus using default
+	// settings:
+	dev, err := bmxx80.NewI2C(bus, 0x76, &bmxx80.DefaultOpts)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer dev.Halt()
+
+	// Read temperature from the sensor:
+	var env physic.Env
+	if err = dev.Sense(&env); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("%8s %10s %9s\n", env.Temperature, env.Pressure, env.Humidity)
+
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 }
