@@ -1,0 +1,164 @@
+swagger: "2.0"
+info:
+  title: Hometer
+  license:
+    name: MIT
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+host: "localhost:9500"
+basePath: "/v1/"
+tags:
+  - name: temperature
+  - name: humidity
+  - name: pressure
+paths:
+  /temperature:
+    get:
+      tags:
+        - temperature
+      summary: Get the current temperature
+      operationId: getCurrentTemperature
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "success"
+          schema:
+            $ref: "#/definitions/Temperature"
+        500:
+          description: Undefined error
+  /temperatures/{limit}:
+    get:
+      tags:
+        - temperature
+      summary: Get the last temperature values with limit
+      operationId: getLastTemperaturesWithLimit
+      produces:
+        - "application/json"
+      parameters:
+      - name: "limit"
+        in: "path"
+        description: "Limit"
+        required: true
+        type: "integer"
+        format: "int32"
+      responses:
+        200:
+          description: "success"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Temperature"
+        500:
+          description: Undefined error
+  /humditity:
+    get:
+      tags:
+        - humidity
+      summary: Get the current humidity
+      operationId: getCurrentHumidity
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "success"
+          schema:
+            $ref: "#/definitions/Humidity"
+        500:
+          description: Undefined error
+  /humidities/{limit}:
+    get:
+      tags:
+        - humidity
+      summary: Get the last humidities values with limit
+      operationId: getLastHumiditiesWithLimit
+      produces:
+        - "application/json"
+      parameters:
+      - name: "limit"
+        in: "path"
+        description: "Limit"
+        required: true
+        type: "integer"
+        format: "int32"
+      responses:
+        200:
+          description: "success"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Humidity"
+        500:
+          description: Undefined error
+  /pressure:
+    get:
+      tags:
+        - pressure
+      summary: Get the current pressure
+      operationId: getCurrentPressure
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "success"
+          schema:
+            $ref: "#/definitions/Pressure"
+        500:
+          description: Undefined error
+  /pressures/{limit}:
+    get:
+      tags:
+        - pressure
+      summary: Get the last pressures values with limit
+      operationId: getLastPressuresWithLimit
+      produces:
+        - "application/json"
+      parameters:
+      - name: "limit"
+        in: "path"
+        description: "Limit"
+        required: true
+        type: "integer"
+        format: "int32"
+      responses:
+        200:
+          description: "success"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Pressure"
+        500:
+          description: Undefined error
+definitions:
+  Temperature:
+    type: object
+    properties:
+      date:
+        type: string
+        format: date-time
+      value:
+        type: number
+        format: double
+        example: 21,34
+  Humidity:
+    type: object
+    properties:
+      date:
+        type: string
+        format: date-time
+      value:
+        type: number
+        format: double
+        example: 58,43
+  Pressure:
+    type: object
+    properties:
+      date:
+        type: string
+        format: date-time
+      value:
+        type: number
+        format: double
+        example: 926,2 
