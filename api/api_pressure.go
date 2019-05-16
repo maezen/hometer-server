@@ -10,11 +10,61 @@
 package api
 
 import (
+	"encoding/json"
+	"hometer-server/model"
 	"net/http"
+	"strconv"
+	"strings"
+	"time"
+
+	"periph.io/x/periph/conn/i2c/i2creg"
+	"periph.io/x/periph/conn/physic"
+	"periph.io/x/periph/devices/bmxx80"
 )
 
 func GetCurrentPressure(w http.ResponseWriter, r *http.Request) {
+	
+	// Open a handle to the first available I²C bus:
+	bus, err := i2creg.Open("")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	defer bus.Close()
+
+	// Open a handle to a bme280/bmp280 connected on the I²C bus using default
+	// settings:
+	dev, err := bmxx80.NewI2C(bus, 0x76, &bmxx80.DefaultOpts)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	defer dev.Halt()
+
+	// Read temperature from the sensor:
+	var env physic.Env
+	if err = dev.Sense(&env); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	pressureString := strings.Replace(env.Pressure.String(), "kPa", "", 1)
+	pressureFloat, err := strconv.ParseFloat(pressureString, 64)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	pressure := model.Pressure{Date: time.Now(), Value: pressureFloat}
+	json, err := json.Marshal(pressure)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Write(json)
 	w.WriteHeader(http.StatusOK)
 }
 

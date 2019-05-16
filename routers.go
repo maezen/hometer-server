@@ -59,7 +59,7 @@ var routes = Routes{
 	Route{
 		"GetCurrentHumidity",
 		strings.ToUpper("Get"),
-		"/v1/humditity",
+		"/v1/humidity",
 		api.GetCurrentHumidity,
 	},
 

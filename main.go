@@ -12,10 +12,17 @@ package main
 import (
 	"log"
 	"net/http"
+
+	"periph.io/x/periph/host"
 )
 
 func main() {
 	log.Printf("Server started")
+
+	// Load all the drivers:
+	if _, err := host.Init(); err != nil {
+		log.Fatal(err)
+	}
 
 	router := NewRouter()
 
