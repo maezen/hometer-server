@@ -142,3 +142,7 @@ Temporary Items
 .history
 
 # End of https://www.gitignore.io/api/go,macos,jetbrains,visualstudiocode
+
+hometer
+nohup.log
+pid.txt
