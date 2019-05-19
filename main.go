@@ -10,6 +10,7 @@
 package main
 
 import (
+	"hometer-server/store"
 	"log"
 	"net/http"
 
@@ -23,6 +24,9 @@ func main() {
 	if _, err := host.Init(); err != nil {
 		log.Fatal(err)
 	}
+
+	// Start logging
+	go store.StartLoggingValues()
 
 	router := NewRouter()
 
