@@ -12,18 +12,20 @@ package api
 import (
 	"encoding/json"
 	"hometer-server/model"
+	"hometer-server/store"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/gorilla/mux"
 	"periph.io/x/periph/conn/i2c/i2creg"
 	"periph.io/x/periph/conn/physic"
 	"periph.io/x/periph/devices/bmxx80"
 )
 
 func GetCurrentPressure(w http.ResponseWriter, r *http.Request) {
-	
+
 	// Open a handle to the first available I²C bus:
 	bus, err := i2creg.Open("")
 	if err != nil {
@@ -69,6 +71,28 @@ func GetCurrentPressure(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetLastPressuresWithLimit(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	limit, err := strconv.Atoi(params["limit"])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if len(store.Pressures) < limit {
+		// TODO: use correct response code
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	pressures := store.Pressures[len(store.Pressures)-limit:]
+	json, err := json.Marshal(pressures)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Write(json)
 	w.WriteHeader(http.StatusOK)
 }

@@ -12,11 +12,13 @@ package api
 import (
 	"encoding/json"
 	"hometer-server/model"
+	"hometer-server/store"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/gorilla/mux"
 	"periph.io/x/periph/conn/i2c/i2creg"
 	"periph.io/x/periph/conn/physic"
 	"periph.io/x/periph/devices/bmxx80"
@@ -69,6 +71,28 @@ func GetCurrentHumidity(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetLastHumiditiesWithLimit(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	limit, err := strconv.Atoi(params["limit"])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if len(store.Humidities) < limit {
+		// TODO: use correct response code
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	humidities := store.Humidities[len(store.Humidities)-limit:]
+	json, err := json.Marshal(humidities)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Write(json)
 	w.WriteHeader(http.StatusOK)
 }

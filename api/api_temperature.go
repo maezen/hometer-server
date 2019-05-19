@@ -12,9 +12,12 @@ package api
 import (
 	"encoding/json"
 	"hometer-server/model"
+	"hometer-server/store"
 	"net/http"
+	"strconv"
 	"time"
 
+	"github.com/gorilla/mux"
 	"periph.io/x/periph/conn/i2c/i2creg"
 	"periph.io/x/periph/conn/physic"
 	"periph.io/x/periph/devices/bmxx80"
@@ -60,6 +63,28 @@ func GetCurrentTemperature(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetLastTemperaturesWithLimit(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	limit, err := strconv.Atoi(params["limit"])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if len(store.Temperatures) < limit {
+		// TODO: use correct response code
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	temperatures := store.Temperatures[len(store.Temperatures)-limit:]
+	json, err := json.Marshal(temperatures)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Write(json)
 	w.WriteHeader(http.StatusOK)
 }
