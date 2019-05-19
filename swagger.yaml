@@ -51,6 +51,8 @@ paths:
             type: array
             items:
               $ref: "#/definitions/Temperature"
+        400:
+          description: Limit can not be processed
         500:
           description: Undefined error
   /humidity:
@@ -90,6 +92,8 @@ paths:
             type: array
             items:
               $ref: "#/definitions/Humidity"
+        400:
+          description: Limit can not be processed
         500:
           description: Undefined error
   /pressure:
@@ -129,6 +133,8 @@ paths:
             type: array
             items:
               $ref: "#/definitions/Pressure"
+        400:
+          description: Limit can not be processed
         500:
           description: Undefined error
 definitions:
