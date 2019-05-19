@@ -51,6 +51,8 @@ func GetCurrentHumidity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// periph returns the sensors messurement as string with unit attached
+	// Remove the unit and convert to double
 	humidityString := strings.Replace(env.Humidity.String(), "%rH", "", 1)
 	humidityFloat, err := strconv.ParseFloat(humidityString, 64)
 	if err != nil {
@@ -58,6 +60,7 @@ func GetCurrentHumidity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Create humidity object from sensor value and create json object
 	humdidity := model.Humidity{Date: time.Now(), Value: humidityFloat}
 	json, err := json.Marshal(humdidity)
 	if err != nil {
@@ -72,6 +75,7 @@ func GetCurrentHumidity(w http.ResponseWriter, r *http.Request) {
 
 func GetLastHumiditiesWithLimit(w http.ResponseWriter, r *http.Request) {
 
+	// Get limit param from request url
 	params := mux.Vars(r)
 	limit, err := strconv.Atoi(params["limit"])
 	if err != nil {
@@ -79,12 +83,14 @@ func GetLastHumiditiesWithLimit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Return error if there are not enough stored values
 	if len(store.Humidities) < limit {
 		// TODO: use correct response code
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
+	// Get last n (limit) humdity values from store and create json array for response
 	humidities := store.Humidities[len(store.Humidities)-limit:]
 	json, err := json.Marshal(humidities)
 	if err != nil {

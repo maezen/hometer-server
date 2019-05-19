@@ -51,6 +51,8 @@ func GetCurrentPressure(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// periph returns the sensors messurement as string with unit attached
+	// Remove the unit and convert to double
 	pressureString := strings.Replace(env.Pressure.String(), "kPa", "", 1)
 	pressureFloat, err := strconv.ParseFloat(pressureString, 64)
 	if err != nil {
@@ -58,6 +60,7 @@ func GetCurrentPressure(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Create pressure object from sensor value and create json object
 	pressure := model.Pressure{Date: time.Now(), Value: pressureFloat}
 	json, err := json.Marshal(pressure)
 	if err != nil {
@@ -72,6 +75,7 @@ func GetCurrentPressure(w http.ResponseWriter, r *http.Request) {
 
 func GetLastPressuresWithLimit(w http.ResponseWriter, r *http.Request) {
 
+	// Get limit param from request url
 	params := mux.Vars(r)
 	limit, err := strconv.Atoi(params["limit"])
 	if err != nil {
@@ -79,12 +83,14 @@ func GetLastPressuresWithLimit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Return error if there are not enough stored values
 	if len(store.Pressures) < limit {
 		// TODO: use correct response code
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
+	// Get last n (limit) pressure values from store and create json array for response
 	pressures := store.Pressures[len(store.Pressures)-limit:]
 	json, err := json.Marshal(pressures)
 	if err != nil {

@@ -52,18 +52,25 @@ func StartLoggingValues() {
 			continue
 		}
 
+		// Get current humidity value
+		// periph returns the sensors messurement as string with unit attached
+		// Remove the unit and convert to double
 		humidityString := strings.Replace(env.Humidity.String(), "%rH", "", 1)
 		humidityFloat, err := strconv.ParseFloat(humidityString, 64)
 		if err != nil {
 			continue
 		}
 
+		// GEt curret pressure value
+		// periph returns the sensors messurement as string with unit attached
+		// Remove the unit and convert to double
 		pressureString := strings.Replace(env.Pressure.String(), "kPa", "", 1)
 		pressureFloat, err := strconv.ParseFloat(pressureString, 64)
 		if err != nil {
 			continue
 		}
 
+		// Create models and append to global slices
 		temperature := model.Temperature{Date: time.Now(), Value: env.Temperature.Celsius()}
 		humdidity := model.Humidity{Date: time.Now(), Value: humidityFloat}
 		pressure := model.Pressure{Date: time.Now(), Value: pressureFloat}
@@ -72,7 +79,8 @@ func StartLoggingValues() {
 		Humidities = append(Humidities, humdidity)
 		Pressures = append(Pressures, pressure)
 
-		// Sleep 5s minute till next value logging
+		// TODO: create webservice to set the sleep time via api
+		// Sleep 5 minute till next value logging
 		time.Sleep(5 * time.Minute)
 	}
 }

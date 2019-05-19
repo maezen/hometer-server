@@ -50,6 +50,7 @@ func GetCurrentTemperature(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Create temperature object from sensor value and create json object
 	temperature := model.Temperature{Date: time.Now(), Value: env.Temperature.Celsius()}
 	json, err := json.Marshal(temperature)
 	if err != nil {
@@ -64,6 +65,7 @@ func GetCurrentTemperature(w http.ResponseWriter, r *http.Request) {
 
 func GetLastTemperaturesWithLimit(w http.ResponseWriter, r *http.Request) {
 
+	// Get limit param from request url
 	params := mux.Vars(r)
 	limit, err := strconv.Atoi(params["limit"])
 	if err != nil {
@@ -71,12 +73,14 @@ func GetLastTemperaturesWithLimit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Return error if there are not enough stored values
 	if len(store.Temperatures) < limit {
 		// TODO: use correct response code
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
+	// Get last n (limit) temperature values from store and create json array for response
 	temperatures := store.Temperatures[len(store.Temperatures)-limit:]
 	json, err := json.Marshal(temperatures)
 	if err != nil {
